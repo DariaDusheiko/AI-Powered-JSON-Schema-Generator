@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PYTHONPATH=/app
+      - RELOAD_APP=${RELOAD_APP}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+      - ACCESS_TOKEN_ALGORITHM=${ACCESS_TOKEN_ALGORITHM}
+      - APP_PORT=${APP_PORT}
+      - ENV=${ENV}
+      - APP_HOST=${APP_HOST}
+      - PATH_PREFIX=${PATH_PREFIX}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY}
+    depends_on:
+      - database
+    networks:
+      - internal-net
+
+  database:
+    image: postgres:latest
+    container_name: jsonit-database
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_HOST=${DATABASE_HOST}
+    command: postgres -p ${DATABASE_PORT}
+    volumes:
+      - ./backend/src/:/data
+    networks:
+      - internal-net
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+
+networks:
+  internal-net:
